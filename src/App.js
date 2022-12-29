@@ -37,36 +37,38 @@ const initialFacts = [
 
 function App() {
   const [showForm, setShowForm] = useState(false);
+  const [fact, setFact] = useState(initialFacts);
   return (
     <>
-      <Header setShowForm={setShowForm} />
+      <Header showForm={showForm} setShowForm={setShowForm} />
 
-      {showForm ? <NewFactForm /> : null}
+      {showForm ? (
+        <NewFactForm setFact={setFact} setShowForm={setShowForm} />
+      ) : null}
 
       <main className="main">
         <CategoryFilter />
-        <FactList />
+        <FactList fact={fact} />
       </main>
     </>
   );
 }
 function Header({ showForm, setShowForm }) {
-  <header className="header">
-    <div className="logo">
-      <img src="logo.png" alt="today i learned logo" />
-      <h1>Today I Learned !</h1>
-    </div>
+  return (
+    <header className="header">
+      <div className="logo">
+        <img src="logo.png" alt="today i learned logo" />
+        <h1>Today I Learned !</h1>
+      </div>
 
-    <button
-      className="btn btn-large btn-open"
-      onClick={() => setShowForm((show) => !show)}
-    >
-      {showForm ? "Close" : "Share a fact"}
-    </button>
-  </header>;
-}
-function NewFactForm() {
-  return <form className="fact-form">new form</form>;
+      <button
+        className="btn btn-large btn-open"
+        onClick={() => setShowForm((show) => !show)}
+      >
+        {showForm ? "Close" : "Share a fact"}
+      </button>
+    </header>
+  );
 }
 
 const CATEGORIES = [
@@ -79,6 +81,74 @@ const CATEGORIES = [
   { name: "history", color: "#f97316" },
   { name: "news", color: "#8b5cf6" },
 ];
+function isValidHttpUrl(string) {
+  let url;
+  try {
+    url = new URL(string);
+  } catch (_) {
+    return false;
+  }
+  return url.protocol === "http:" || url.protocol === "https:";
+}
+
+function NewFactForm({ setFact, setShowForm }) {
+  const [text, setText] = useState("");
+  const [source, setSource] = useState("https://nirajankarki.vercel.app");
+  const [category, setCategory] = useState("");
+
+  const textLength = text.length;
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    console.log(text, source, category);
+
+    if (text && isValidHttpUrl(source) && category && textLength <= 200) {
+      const newFact = {
+        id: Math.round(Math.random() * 1000000),
+        text,
+        source,
+        category,
+        votesInteresting: 0,
+        votesMindblowing: 0,
+        votesFalse: 0,
+        createdIn: new Date().getFullYear(),
+      };
+      setFact((fact) => [newFact, ...fact]);
+
+      setText("");
+      setSource("");
+      setCategory("");
+
+      setShowForm(false);
+    }
+  }
+  return (
+    <form className="fact-form" onSubmit={handleSubmit}>
+      <input
+        type="text"
+        placeholder="Share a fact with the world..."
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+      <span>{200 - textLength}</span>
+      <input
+        type="'text"
+        placeholder="Trustworthy source"
+        value={source}
+        onChange={(e) => setSource(e.target.value)}
+      />
+      <select value={category} onChange={(e) => setCategory(e.target.value)}>
+        <option value="">choose category</option>
+        {CATEGORIES.map((cat) => (
+          <option value={cat.name} key={cat.name}>
+            {cat.name.toUpperCase()}
+          </option>
+        ))}
+      </select>
+      <button className="btn btn-large">Post</button>
+    </form>
+  );
+}
 
 function CategoryFilter() {
   return (
@@ -101,12 +171,11 @@ function CategoryFilter() {
     </aside>
   );
 }
-function FactList() {
-  const facts = initialFacts;
+function FactList({ fact }) {
   return (
     <section>
       <ul className="facts-list">
-        {facts.map((fact) => {
+        {fact.map((fact) => {
           return <Fact fact={fact} key={fact.id} />;
         })}
       </ul>
