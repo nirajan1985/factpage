@@ -2,40 +2,6 @@ import React, { useState, useEffect } from "react";
 import supabase from "./supabase";
 import "./style.css";
 
-const initialFacts = [
-  {
-    id: 1,
-    text: "React is being developed by Meta (formerly facebook)",
-    source: "https://opensource.fb.com/",
-    category: "technology",
-    votesInteresting: 24,
-    votesMindblowing: 9,
-    votesFalse: 4,
-    createdIn: 2021,
-  },
-  {
-    id: 2,
-    text: "Millennial dads spend 3 times as much time with their kids than their fathers spent with them. In 1982, 43% of fathers had never changed a diaper. Today, that number is down to 3%",
-    source:
-      "https://www.mother.ly/parenting/millennial-dads-spend-more-time-with-their-kids",
-    category: "society",
-    votesInteresting: 11,
-    votesMindblowing: 2,
-    votesFalse: 0,
-    createdIn: 2019,
-  },
-  {
-    id: 3,
-    text: "Lisbon is the capital of Portugal",
-    source: "https://en.wikipedia.org/wiki/Lisbon",
-    category: "society",
-    votesInteresting: 8,
-    votesMindblowing: 3,
-    votesFalse: 1,
-    createdIn: 2015,
-  },
-];
-
 function App() {
   const [showForm, setShowForm] = useState(false);
   const [fact, setFact] = useState([]);
@@ -46,7 +12,7 @@ function App() {
     function () {
       async function getFact() {
         setIsLoading(true);
-        let query = supabase.from("fact").select("*");
+        let query = supabase.from("facts").select("*");
         if (currentCategory !== "all") {
           query = query.eq("category", currentCategory);
         }
@@ -76,7 +42,7 @@ function App() {
 
       <main className="main">
         <CategoryFilter setCurrentCategory={setCurrentCategory} />
-        {isLoading ? <Loader /> : <FactList fact={fact} />}
+        {isLoading ? <Loader /> : <FactList fact={fact} setFact={setFact} />}
       </main>
     </>
   );
@@ -90,7 +56,7 @@ function Header({ showForm, setShowForm }) {
     <header className="header">
       <div className="logo">
         <img src="logo.png" alt="today i learned logo" />
-        <h1>Today I Learned !</h1>
+        <h1>Interesting Facts !</h1>
       </div>
 
       <button
@@ -125,7 +91,7 @@ function isValidHttpUrl(string) {
 
 function NewFactForm({ setFact, setShowForm }) {
   const [text, setText] = useState("");
-  const [source, setSource] = useState("https://nirajankarki.vercel.app");
+  const [source, setSource] = useState("");
   const [category, setCategory] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
@@ -137,12 +103,12 @@ function NewFactForm({ setFact, setShowForm }) {
     if (text && isValidHttpUrl(source) && category && textLength <= 200) {
       setIsUploading(true);
       const { data: newFact, error } = await supabase
-        .from("fact")
+        .from("facts")
         .insert([{ text, source, category }])
         .select();
       setIsUploading(false);
 
-      setFact((fact) => [newFact[0], ...fact]);
+      if (!error) setFact((fact) => [newFact[0], ...fact]);
 
       setText("");
       setSource("");
@@ -214,7 +180,7 @@ function CategoryFilter({ setCurrentCategory }) {
     </aside>
   );
 }
-function FactList({ fact }) {
+function FactList({ fact, setFact }) {
   if (fact.length === 0)
     return (
       <p className="message">
@@ -225,14 +191,30 @@ function FactList({ fact }) {
     <section>
       <ul className="facts-list">
         {fact.map((fact) => {
-          return <Fact fact={fact} key={fact.id} />;
+          return <Fact fact={fact} key={fact.id} setFact={setFact} />;
         })}
       </ul>
       <p>There are {fact.length} facts in the database. Add your own !</p>
     </section>
   );
 }
-function Fact({ fact }) {
+function Fact({ fact, setFact }) {
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  async function handleVote(columnName) {
+    setIsUpdating(true);
+    const { data: updatedFact, error } = await supabase
+      .from("facts")
+      .update([{ [columnName]: fact[columnName] + 1 }])
+      .eq("id", fact.id)
+      .select();
+    setIsUpdating(false);
+
+    if (!error)
+      setFact((facts) =>
+        facts.map((f) => (f.id === fact.id ? updatedFact[0] : f))
+      );
+  }
   return (
     <li className="fact">
       <p>
@@ -252,9 +234,21 @@ function Fact({ fact }) {
         </span>
       </p>
       <div className="vote-buttons">
-        <button>👍 {fact.votesInteresting}</button>
-        <button>🤯 {fact.votesMindblowing}</button>
-        <button>⛔ {fact.votesFalse}</button>
+        <button
+          onClick={() => handleVote("votesInteresting")}
+          disabled={isUpdating}
+        >
+          👍 {fact.votesInteresting}
+        </button>
+        <button
+          onClick={() => handleVote("votesMindblowing")}
+          disabled={isUpdating}
+        >
+          🤯 {fact.votesMindblowing}
+        </button>
+        <button onClick={() => handleVote("votesFalse")} disabled={isUpdating}>
+          ⛔ {fact.votesFalse}
+        </button>
       </div>
     </li>
   );

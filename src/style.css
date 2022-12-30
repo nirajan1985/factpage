@@ -140,6 +140,9 @@ ul {
   background-color: #292524;
   cursor: pointer;
 }
+.vote-buttons button:disabled {
+  background-color: #78716c;
+}
 .fact-form {
   display: flex;
   align-items: center;
