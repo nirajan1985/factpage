@@ -152,6 +152,11 @@ ul {
   padding: 16px 32px;
   margin-bottom: 40px;
 }
+.disputed {
+  color: #ef4444;
+  font-weight: 600;
+  margin-right: 10px;
+}
 .hidden {
   display: none !important;
 }

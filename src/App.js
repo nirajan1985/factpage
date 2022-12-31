@@ -72,7 +72,7 @@ function Header({ showForm, setShowForm }) {
 const CATEGORIES = [
   { name: "technology", color: "#3b82f6" },
   { name: "science", color: "#16a34a" },
-  { name: "finance", color: "#ef4444" },
+  { name: "sports", color: "#ef4444" },
   { name: "society", color: "#eab308" },
   { name: "entertainment", color: "#db2777" },
   { name: "health", color: "#14b8a6" },
@@ -114,7 +114,7 @@ function NewFactForm({ setFact, setShowForm }) {
       setSource("");
       setCategory("");
 
-      //setShowForm(false);
+      setShowForm(false);
     }
   }
   return (
@@ -200,6 +200,8 @@ function FactList({ fact, setFact }) {
 }
 function Fact({ fact, setFact }) {
   const [isUpdating, setIsUpdating] = useState(false);
+  const isDisputed =
+    fact.votesInteresting + fact.votesMindblowing < fact.votesFalse;
 
   async function handleVote(columnName) {
     setIsUpdating(true);
@@ -218,6 +220,7 @@ function Fact({ fact, setFact }) {
   return (
     <li className="fact">
       <p>
+        {isDisputed ? <span className="disputed">[⛔DISPUTED]</span> : null}
         {fact.text}
         <a className="source" href={fact.source} target="_blank">
           (source)
