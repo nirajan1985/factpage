@@ -7,7 +7,7 @@ body {
   background-color: #292524;
   color: #fafaf9;
   font-family: "Sono", sans-serif;
-  padding: 48px 64px;
+  padding: 48px 64px 0;
 }
 .header {
   display: flex;
@@ -37,6 +37,11 @@ h1 {
   display: grid;
   grid-template-columns: 250px 1fr;
   gap: 48px;
+  height: calc(100vh - 73.6px - 48px - 40px);
+}
+section {
+  overflow: scroll;
+  padding-bottom: 40px;
 }
 @media screen and (max-width: 900px) {
   .main {
