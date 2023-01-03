@@ -21,6 +21,10 @@ body {
   }
   .logo h1 {
     font-size: 40px;
+    margin-bottom: 20px;
+  }
+  .logo img {
+    display: none;
   }
 }
 .logo {
