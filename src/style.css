@@ -15,6 +15,14 @@ body {
   justify-content: space-between;
   margin-bottom: 40px;
 }
+@media screen and (max-width: 560px) {
+  .header {
+    flex-direction: column;
+  }
+  .logo h1 {
+    font-size: 40px;
+  }
+}
 .logo {
   display: flex;
   align-items: center;
@@ -33,12 +41,14 @@ h1 {
   max-width: 1600px;
   margin: 0 auto;
 }
+
 .main {
   display: grid;
   grid-template-columns: 250px 1fr;
   gap: 48px;
   height: calc(100vh - 73.6px - 48px - 40px);
 }
+
 section {
   overflow: scroll;
   padding-bottom: 40px;
@@ -46,13 +56,13 @@ section {
 @media screen and (max-width: 900px) {
   .main {
     grid-template-columns: 1fr;
+    height: auto;
   }
 }
 .fact {
   display: flex;
   align-items: center;
   gap: 24px;
-
   background-color: #78716c;
   font-size: 20px;
   margin-bottom: 18px;
